@@ -1,0 +1,46 @@
+name: macOS Build and Release
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: macos-latest  # 使用最新的 macOS 环境
+
+    steps:
+      # 检出代码
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # 安装 Homebrew
+      - name: Install Homebrew
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      # 安装依赖项（如果需要）
+      - name: Install Dependencies
+        run: |
+          brew install cmake nasm libpng freetype fontconfig jpeg-turbo giflib xz lz4 zstd libtiff \
+          little-cms2 libdeflate pkgconf openexr webp docbook mpdecimal ca-certificates openssl@3 \
+          readline sqlite python@3.13 boost source-highlight asciidoc docbook-xsl doxygen python@3.11 \
+          python@3.12 certifi sphinx-doc jpeg-xl libvmaf yasm aom libavif gd
+
+      # 编译 vnstat 或其他软件
+      - name: Build vnstat
+        run: |
+          git clone https://github.com/vergoh/vnstat.git
+          cd vnstat
+          make
+          sudo make install
+
+      # (可选) 发布构建结果为 Artifact
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: vnstat-build
+          path: /usr/local/bin/vnstat  # 或者其他构建的输出文件路径
