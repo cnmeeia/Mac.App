@@ -40,7 +40,7 @@ jobs:
 
       # (可选) 发布构建结果为 Artifact
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: vnstat-build
           path: /usr/local/bin/vnstat  # 或者其他构建的输出文件路径
