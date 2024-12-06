@@ -1,16 +1,13 @@
-name: Test macOS Environment
-
-on:
-  push:
-    branches:
-      - main
-
 jobs:
-  test-macos:
+  build:
     runs-on: macos-latest
 
     steps:
-      - name: Check Environment
+      - name: Install Rosetta
         run: |
-          uname -a
-          sw_vers
+          softwareupdate --install-rosetta --agree-to-license
+
+      - name: Configure and Build for x86_64
+        run: |
+          ./configure --host=x86_64-apple-darwin --build=aarch64-apple-darwin
+          make
