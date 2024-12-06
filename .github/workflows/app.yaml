@@ -1,4 +1,4 @@
-name: Build and Upload wget on macOS
+name: Test macOS Environment
 
 on:
   push:
@@ -6,40 +6,11 @@ on:
       - main
 
 jobs:
-  build-and-upload:
+  test-macos:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v3
-
-      - name: Install dependencies
+      - name: Check Environment
         run: |
-          brew install gcc libssl openssl gettext
-
-      - name: Download wget source code
-        run: |
-          curl -O https://ftp.gnu.org/gnu/wget/wget-latest.tar.gz
-          tar -xzf wget-latest.tar.gz
-          cd wget-*
-          ./configure --with-ssl=openssl --prefix=$HOME/wget_build
-
-      - name: Compile wget for x86_64
-        run: |
-          cd wget-* 
-          make
-
-      - name: Install wget
-        run: |
-          cd wget-*
-          make install
-
-      - name: Archive the compiled wget
-        run: |
-          tar -czvf wget.tar.gz -C $HOME/wget_build .
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: wget-binary
-          path: wget.tar.gz
+          uname -a
+          sw_vers
