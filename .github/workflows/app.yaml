@@ -37,6 +37,19 @@ jobs:
         cd wget-1.9.1
         sudo make install
 
-    - name: Verify Wget installation
+    - name: Package Wget
       run: |
-        wget --version
+        mkdir -p wget-package/usr/local/bin
+        cp wget-1.9.1/src/wget wget-package/usr/local/bin/
+        cd wget-package
+        zip -r ../wget-package.zip .
+
+    - name: Upload Wget package to GitHub Releases
+      uses: softprops/action-gh-release@v1
+      with:
+        files: wget-package.zip
+        tag: ${{ github.ref }}
+        name: Wget Package
+        body: "This is the Wget package built for Mac M1."
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
