@@ -1,13 +1,48 @@
+name: Build Wget for Mac M1
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
 jobs:
   build:
     runs-on: macos-latest
 
     steps:
-      - name: Install Rosetta
-        run: |
-          softwareupdate --install-rosetta --agree-to-license
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Configure and Build for x86_64
-        run: |
-          ./configure --host=x86_64-apple-darwin --build=aarch64-apple-darwin
-          make
+    - name: Install dependencies
+      run: |
+        brew install automake autoconf libtool
+
+    - name: Download Wget source
+      run: |
+        curl -O http://ftp.gnu.org/gnu/wget/wget-1.9.1.tar.gz
+
+    - name: Extract Wget source
+      run: |
+        tar zxvf wget-1.9.1.tar.gz
+
+    - name: Build Wget
+      run: |
+        cd wget-1.9.1
+        ./configure
+        make
+
+    - name: Package Wget
+      run: |
+        cd wget-1.9.1
+        make install DESTDIR=../wget-package
+        cd ..
+        tar -czvf wget-package.tar.gz wget-package
+
+    - name: Upload Wget package to GitHub Releases
+      uses: softprops/action-gh-release@v1
+      with:
+        files: wget-package.tar.gz
+        tag: ${{ github.ref }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
