@@ -34,7 +34,9 @@ jobs:
 
     - name: Package Wget
       run: |
+        mkdir -p wget-package/usr/local/man/man1
         cd wget-1.9.1
+        /usr/bin/install -c -m 644 wget.1 ../wget-package/usr/local/man/man1/wget.1
         make install DESTDIR=../wget-package
         cd ..
         tar -czvf wget-package.tar.gz wget-package
