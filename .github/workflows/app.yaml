@@ -48,7 +48,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: wget-package.zip
-        tag: ${{ github.ref }}
+        tag_name: ${{ github.ref }}  # 使用 tag_name 而不是 tag
         name: Wget Package
         body: "This is the Wget package built for Mac M1."
       env:
