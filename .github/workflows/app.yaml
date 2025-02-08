@@ -1,50 +1,38 @@
-name: Build Wget for Mac M1
+name: Build and Release wget for Mac m1
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
+  release:
+    types: [created]
 
 jobs:
   build:
     runs-on: macos-latest
+    if: startsWith(github.event.release.tag, 'v')
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Install dependencies
-      run: |
-        brew install automake autoconf libtool
+      - name: Install dependencies
+        run: brew install autoconf automake libtool
 
-    - name: Download Wget source
-      run: |
-        curl -O http://ftp.gnu.org/gnu/wget/wget-1.9.1.tar.gz
+      - name: Configure wget
+        run: ./configure
 
-    - name: Extract Wget source
-      run: |
-        tar zxvf wget-1.9.1.tar.gz
+      - name: Build wget
+        run: make
 
-    - name: Build Wget
-      run: |
-        cd wget-1.9.1
-        ./configure
-        make
+      - name: Create release asset
+        run: |
+          mkdir wget-dist
+          cp wget wget-dist/
+          tar -czvf wget-m1.tar.gz wget-dist
+          rm -rf wget-dist
 
-    - name: Package Wget
-      run: |
-        mkdir -p wget-package/usr/local/man/man1
-        cd wget-1.9.1
-        /usr/bin/install -c -m 644 wget.1 ../wget-package/usr/local/man/man1/wget.1
-        make install DESTDIR=../wget-package
-        cd ..
-        tar -czvf wget-package.tar.gz wget-package
-
-    - name: Upload Wget package to GitHub Releases
-      uses: softprops/action-gh-release@v1
-      with:
-        files: wget-package.tar.gz
-        tag: ${{ github.ref }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: wget-m1.tar.gz
+          asset_name: wget-m1.tar.gz
+          asset_content_type: application/gzip
